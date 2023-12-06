@@ -1,0 +1,9 @@
+{
+    "clangd.path": "clangd-17",
+    // use CMake: Configure command to generate cmake commands
+    "cmake.sourceDirectory": "${workspaceFolder}",
+    "cmake.buildDirectory": "${workspaceFolder}/build",
+    "cmake.debugConfig": {
+        "miDebuggerPath": "/usr/bin/gdb", // lldb is not supported...?
+    }
+}
