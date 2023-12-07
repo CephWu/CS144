@@ -2,7 +2,6 @@
 
 #include <string>
 #include <string_view>
-#include <vector>
 
 class Reader;
 class Writer;
@@ -13,13 +12,23 @@ protected:
   uint64_t capacity_;
   // Please add any additional state to the ByteStream here, and not to the Writer and Reader interfaces.
   bool _error {};
-  std::vector<char> _buffer;
+  std::string _buffer;
+
+  // char* _buffer; // remember garbage collect
+  // size_t _buffer_cap;
+  // size_t _offset {};
+  // size_t _length {};
+  // void _shrink_to_fit(); // extend buffer
+
   size_t _bytes_popped {};
   size_t _bytes_pushed {};
   bool _closed {};
 
 public:
   explicit ByteStream( uint64_t capacity );
+  // ~ByteStream();
+  // ByteStream( const ByteStream& other );
+  // ByteStream& operator=( const ByteStream& other );
 
   // Helper functions (provided) to access the ByteStream's Reader and Writer interfaces
   Reader& reader();
