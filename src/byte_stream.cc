@@ -68,7 +68,7 @@ void Writer::push( const string_view& data )
   // _buffer.resize( old_size + write_num );
   // copy( data.begin(), data.begin() + write_num, _buffer.begin() + static_cast<int64_t>( old_size ) );
 
-  //* deque<char> impl: ByteStream throughput: 0.13 Gbit/s
+  //* deque<char> impl: ByteStream throughput: 0.58 Gbit/s
   // auto write_num = min( available_capacity(), data.size() );
   // _bytes_pushed += write_num;
   // size_t old_size = _buffer.size();
@@ -130,8 +130,6 @@ uint64_t Writer::bytes_pushed() const
   return _bytes_pushed;
 }
 
-// static string _view_str;
-
 string_view Reader::peek() const
 {
   // Your code here.
@@ -139,14 +137,14 @@ string_view Reader::peek() const
   //   return {};
   // }
   // string -> char* -> string_view
-  // return { &_buffer.front(), 1 }; // this is very slow for string
+  //! this is exactly slow for string and vector. unreasonable.
+  // return { &_buffer.front(), 1 };
   //* for string
   return { _buffer };
   //* for vector
   // return string_view { _buffer.data(), _buffer.size() };
   //* for deque
-  // _view_str = string { _buffer.begin(), _buffer.end() };
-  // return { _view_str };
+  // return { &_buffer.front(), 1 };
   //* for char*
   // return { _buffer + _offset, _buffer + _offset + _length };
 }
