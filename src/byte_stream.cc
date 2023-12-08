@@ -52,10 +52,10 @@ void Writer::push( const string_view& data )
 {
   // Your code here.
 
-  //* string impl (best): ByteStream throughput: 3.95 Gbit/s
-  auto write_num = min( available_capacity(), data.size() );
-  _bytes_pushed += write_num;
-  _buffer += data.substr( 0, write_num );
+  //* string impl: ByteStream throughput: 3.95 Gbit/s
+  // auto write_num = min( available_capacity(), data.size() );
+  // _bytes_pushed += write_num;
+  // _buffer += data.substr( 0, write_num );
 
   //* vector<char> impl: ByteStream throughput: 3.32 Gbit/s
   // auto write_num = min( available_capacity(), data.size() );
@@ -90,6 +90,16 @@ void Writer::push( const string_view& data )
   // for ( const auto* it = data.begin(); it != data.begin() + static_cast<int64_t>( write_num ); it++ ) {
   //   _buffer.push( *it );
   // }
+
+  //* vector<string> impl: ByteStream throughput: 10.00+ Gbit/s
+  //* https://zhuanlan.zhihu.com/p/630739394
+  const auto write_num = min( available_capacity(), data.size() );
+  if ( !write_num ) {
+    return;
+  }
+  _buffer.emplace_back( data.data(), write_num );
+  _bytes_pushed += write_num;
+  _bytes_buffered += write_num;
 }
 
 // void ByteStream::_shrink_to_fit()
@@ -119,9 +129,11 @@ bool Writer::is_closed() const
 uint64_t Writer::available_capacity() const
 {
   // Your code here.
-  return capacity_ - _buffer.size();
+  // return capacity_ - _buffer.size();
   //* for char*
   // return capacity_ - _length;
+  //* for vector<string>
+  return capacity_ - _bytes_buffered;
 }
 
 uint64_t Writer::bytes_pushed() const
@@ -140,13 +152,18 @@ string_view Reader::peek() const
   //! this is exactly slow for string and vector. unreasonable.
   // return { &_buffer.front(), 1 };
   //* for string
-  return { _buffer };
+  // return { _buffer };
   //* for vector
   // return string_view { _buffer.data(), _buffer.size() };
   //* for deque
   // return { &_buffer.front(), 1 };
   //* for char*
   // return { _buffer + _offset, _buffer + _offset + _length };
+  //* for vector<string>
+  if ( _buffer.empty() ) {
+    return {};
+  }
+  return _buffer[0];
 }
 
 bool Reader::is_finished() const
@@ -164,9 +181,9 @@ bool Reader::has_error() const
 void Reader::pop( uint64_t len )
 {
   // Your code here.
-  auto pop_num = min( len, _buffer.size() );
-  _bytes_popped += pop_num;
-  _buffer.erase( _buffer.begin(), _buffer.begin() + static_cast<int64_t>( pop_num ) );
+  // auto pop_num = min( len, _buffer.size() );
+  // _bytes_popped += pop_num;
+  // _buffer.erase( _buffer.begin(), _buffer.begin() + static_cast<int64_t>( pop_num ) );
   //* for char*
   // auto pop_num = min( len, _length );
   // _bytes_popped += pop_num;
@@ -178,14 +195,30 @@ void Reader::pop( uint64_t len )
   // while ( pop_num-- ) {
   //   _buffer.pop();
   // }
+  //* for vector<string>
+  auto pop_num = min( len, _bytes_buffered );
+  while ( len && !_buffer.empty() ) {
+    const size_t firstsize = _buffer[0].size();
+    if ( len >= firstsize ) {
+      _buffer.erase( _buffer.begin() );
+      len -= firstsize;
+      continue;
+    }
+    _buffer[0].erase( 0, len );
+    len = 0;
+  }
+  _bytes_popped += pop_num;
+  _bytes_buffered -= pop_num;
 }
 
 uint64_t Reader::bytes_buffered() const
 {
   // Your code here.
-  return _buffer.size();
+  // return _buffer.size();
   //* for char*
   // return _length;
+  //* for vector<string>
+  return _bytes_buffered;
 }
 
 uint64_t Reader::bytes_popped() const

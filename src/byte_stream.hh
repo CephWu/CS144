@@ -2,6 +2,7 @@
 
 #include <string>
 #include <string_view>
+#include <vector>
 
 class Reader;
 class Writer;
@@ -12,7 +13,8 @@ protected:
   uint64_t capacity_;
   // Please add any additional state to the ByteStream here, and not to the Writer and Reader interfaces.
   bool _error {};
-  std::string _buffer;
+  std::vector<std::string> _buffer;
+  size_t _bytes_buffered {};
 
   // char* _buffer; // remember garbage collect
   // size_t _buffer_cap;
