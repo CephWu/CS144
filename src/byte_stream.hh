@@ -14,6 +14,7 @@ protected:
   // Please add any additional state to the ByteStream here, and not to the Writer and Reader interfaces.
   bool _error {};
   std::queue<std::string> _buffer;
+  std::string_view _front_view; //* get 6 Gbit/s faster
   size_t _bytes_buffered {};
 
   // char* _buffer; // remember garbage collect

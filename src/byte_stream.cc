@@ -91,7 +91,7 @@ void Writer::push( string data )
   //   _buffer.push( *it );
   // }
 
-  //* vector<string> impl: ByteStream throughput: 10.00+ Gbit/s
+  //* vector<string> impl: ByteStream throughput: 30.00 Gbit/s
   //* https://zhuanlan.zhihu.com/p/630739394
   const auto write_num = min( available_capacity(), data.size() );
   if ( !write_num ) {
@@ -101,6 +101,9 @@ void Writer::push( string data )
     data = data.substr( 0, write_num );
   }
   _buffer.push( std::move( data ) ); // ~3 Gbit/s faster than copy
+  if ( _buffer.size() == 1 ) {
+    _front_view = _buffer.front();
+  }
   _bytes_pushed += write_num;
   _bytes_buffered += write_num;
 }
@@ -163,10 +166,12 @@ string_view Reader::peek() const
   //* for char*
   // return { _buffer + _offset, _buffer + _offset + _length };
   //* for vector<string>
-  if ( _buffer.empty() ) {
-    return {};
-  }
-  return _buffer.front();
+  // if ( _buffer.empty() ) {
+  //   return {};
+  // }
+  // return _buffer.front();
+  //* for front_view
+  return _front_view;
 }
 
 bool Reader::is_finished() const
@@ -198,17 +203,32 @@ void Reader::pop( uint64_t len )
   // while ( pop_num-- ) {
   //   _buffer.pop();
   // }
-  //* for vector<string>
+  //* for queue<string>
   auto pop_num = min( len, _bytes_buffered );
+  // while ( len && !_buffer.empty() ) {
+  //   const size_t firstsize = _buffer.front().size();
+  //   if ( len >= firstsize ) {
+  //     // queue.pop() ~2 Gbit/s faster than vector.erase(vector.begin())
+  //     _buffer.pop();
+  //     len -= firstsize;
+  //     continue;
+  //   }
+  //   _buffer.front().erase( 0, len );
+  //   len = 0;
+  // }
+  //* queue<string> with front_view
   while ( len && !_buffer.empty() ) {
-    const size_t firstsize = _buffer.front().size();
+    const size_t firstsize = _front_view.size();
     if ( len >= firstsize ) {
       // queue.pop() ~2 Gbit/s faster than vector.erase(vector.begin())
       _buffer.pop();
+      if ( !_buffer.empty() ) {
+        _front_view = _buffer.front();
+      }
       len -= firstsize;
       continue;
     }
-    _buffer.front().erase( 0, len );
+    _front_view.remove_prefix( pop_num );
     len = 0;
   }
   _bytes_popped += pop_num;
