@@ -65,8 +65,11 @@ uint64_t Reassembler::bytes_pending() const
   for ( const auto& it : _unassembled_strings ) { // reversed with break?
     if ( it.first >= prev_end ) {
       res += it.second.size();
-      prev_end += it.second.size();
+      prev_end = it.first + it.second.size();
     } else {
+      if ( it.first + it.second.size() > prev_end ) {
+        res += it.first + it.second.size() - prev_end;
+      }
       prev_end = max( prev_end, it.first + it.second.size() );
     }
   }
