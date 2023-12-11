@@ -12,7 +12,7 @@ void TCPReceiver::receive( TCPSenderMessage message, Reassembler& reassembler, W
     _isn = Wrap32 { message.seqno };
   }
   if ( _isn ) {
-    reassembler.insert( message.seqno.unwrap( _isn.value(), _checkpoint ) - ( message.SYN ? 0 : 1 ),
+    reassembler.insert( message.seqno.unwrap( _isn.value(), inbound_stream.bytes_pushed() ) - !message.SYN,
                         message.payload,
                         message.FIN,
                         inbound_stream );

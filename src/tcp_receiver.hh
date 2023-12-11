@@ -5,13 +5,10 @@
 #include "tcp_sender_message.hh"
 #include "wrapping_integers.hh"
 
-#include <cstdint>
-
 class TCPReceiver
 {
 private:
   std::optional<Wrap32> _isn {};
-  uint64_t _checkpoint {}; //! TODO?
   // std::uniform_int_distribution<uint32_t> _gen_isn { 0, UINT32_MAX };
   // std::default_random_engine _rd = get_random_engine();
 
@@ -26,6 +23,7 @@ public:
   TCPReceiverMessage send( const Writer& inbound_stream ) const;
 
   //* (note): send is like heartbeat events to notice the sender the status
+  //* (copy): In your TCP implementation, you’ll use the first unassembled index as the checkpoint
 
   //? Why SYN consumes the first index? Why not just stream indices?
   //* Maybe just for the sender to know that receiver had received the ISN?
