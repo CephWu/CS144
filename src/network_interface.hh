@@ -2,9 +2,10 @@
 
 #include "address.hh"
 #include "ethernet_frame.hh"
+#include "ethernet_header.hh"
 #include "ipv4_datagram.hh"
 
-#include <iostream>
+#include <cstdint>
 #include <list>
 #include <optional>
 #include <queue>
@@ -40,6 +41,18 @@ private:
 
   // IP (known as Internet-layer or network-layer) address of the interface
   Address ip_address_;
+
+  static constexpr uint32_t ARP_REQUEST_COOLDOWN = 5 * 1000;
+  static constexpr uint32_t ARP_CACHE_EXPIRE_TIMEOUT = 30 * 1000;
+
+  std::queue<EthernetFrame> _send_queue;
+  // mapping from IPv4 to its pending datagrams with unknown THA and timeout
+  std::unordered_map<uint32_t, std::pair<std::list<IPv4Datagram>, uint64_t>> _pending_datagrams;
+  // mapping from IPv4 to Physical Address and timeout
+  std::unordered_map<uint32_t, std::pair<EthernetAddress, uint64_t>> _arp_cache;
+
+  inline void _send_datagram( const InternetDatagram& dgram, const EthernetAddress& dst );
+  inline void _clear_pendings( uint32_t ip, const EthernetAddress& dst );
 
 public:
   // Construct a network interface with given Ethernet (network-access-layer) and IP (internet-layer)
