@@ -1,13 +1,15 @@
 # Stanford CS144
 
-git remote add upstream https://github.com/CS144/minnow.git
+**Since 2023-12-16 cs144/minnow made private, I use cherry pick to merge startercode from others.**
 
-Cherry pick:
+Show all commits in the merge commit:
 
 ```txt
-git fetch upstream check1-startercode
-git log upstream/check1-startercode
-git cherry-pick 64a7db0281c238a657b4f0d0125ac57ff6d9ecd3 ...
+git log df53862^..df53862
 ```
 
-> But finally I repack the repository...
+Cherry pick to apply the merge commits in order (not include merge commit):
+
+```txt
+git cherry-pick start..end
+```

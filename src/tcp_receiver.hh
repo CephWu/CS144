@@ -26,6 +26,9 @@ public:
   //* (copy): In your TCP implementation, you’ll use the first unassembled index as the checkpoint
 
   //? Why SYN consumes the first index? Why not just stream indices?
-  //* Maybe just for the sender to know that receiver had received the ISN?
+  //* It is a workaround to distinguish the ACK is either ISN or first byte in stream.
   //* Example: sender: {seqno:10,SYN:true,payload:""}  receiver: {ackno:11,ws:...}
+  //* With SYN length: sender: {seqno:11,payload:"a"}  receiver: {ackno:12,ws:...}
+  //* Without SYN length: sender: {seqno:10,payload:"a"}  receiver: {ackno:11,ws:...}
+  //* I think the main idea is to make the notion clear, and not necessary.
 };
