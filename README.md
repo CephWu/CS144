@@ -2,6 +2,8 @@
 
 **Since 2023-12-16 cs144/minnow made private, I use cherry pick or merge to merge startercode from others.**
 
+> Finally I found https://github.com/fei0319/CS144 which stores all the checkpoint branches.
+
 Show all commits in the merge commit:
 
 ```txt
