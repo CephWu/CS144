@@ -1,6 +1,6 @@
 # Stanford CS144
 
-**Since 2023-12-16 cs144/minnow made private, I use cherry pick to merge startercode from others.**
+**Since 2023-12-16 cs144/minnow made private, I use cherry pick or merge to merge startercode from others.**
 
 Show all commits in the merge commit:
 
@@ -12,4 +12,5 @@ Cherry pick to apply the merge commits in order (not include merge commit):
 
 ```txt
 git cherry-pick start..end
+git cherry-pick start~..end  # include start
 ```
