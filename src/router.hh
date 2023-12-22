@@ -2,8 +2,12 @@
 
 #include "network_interface.hh"
 
+#include <cstdint>
+#include <functional>
+#include <map>
 #include <optional>
 #include <queue>
+#include <utility>
 
 // A wrapper for NetworkInterface that makes the host-side
 // interface asynchronous: instead of returning received datagrams
@@ -18,7 +22,7 @@ public:
   using NetworkInterface::NetworkInterface;
 
   // Construct from a NetworkInterface
-  explicit AsyncNetworkInterface( NetworkInterface&& interface ) : NetworkInterface( interface ) {}
+  explicit AsyncNetworkInterface( NetworkInterface&& interface ) : NetworkInterface( std::move( interface ) ) {}
 
   // \brief Receives and Ethernet frame and responds appropriately.
 
@@ -54,6 +58,12 @@ class Router
 {
   // The router's collection of network interfaces
   std::vector<AsyncNetworkInterface> interfaces_ {};
+
+  // The map deduplicate CIDR and sort by prefix length
+  std::map<std::pair<uint8_t, uint32_t>, std::pair<std::optional<Address>, size_t>, std::greater<>> _table;
+  // Be care that default route must be configured here (even not required)
+  // https://en.wikipedia.org/wiki/Default_route
+  std::pair<std::optional<Address>, size_t> _default_route;
 
 public:
   // Add an interface to the router
