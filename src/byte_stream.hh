@@ -4,6 +4,7 @@
 #include <string>
 #include <string_view>
 
+
 class Reader;
 class Writer;
 
@@ -12,28 +13,18 @@ class ByteStream
 protected:
   uint64_t capacity_;
   // Please add any additional state to the ByteStream here, and not to the Writer and Reader interfaces.
-  bool _error {};
-  std::queue<std::string> _buffer;
+  bool _is_error;
+  std::queue<char> _buffer;
   std::string_view _front_view; //* get 6 Gbit/s faster
-  size_t _bytes_buffered {};
+  size_t _bytes_buffered;
 
-  // char* _buffer; // remember garbage collect
-  // size_t _buffer_cap;
-  // size_t _offset {};
-  // size_t _length {};
-  // void _shrink_to_fit(); // extend buffer
 
-  size_t _bytes_popped {};
-  size_t _bytes_pushed {};
-  bool _closed {};
+  size_t _bytes_popped;
+  size_t _bytes_pushed;
+  bool _is_closed;
 
 public:
   explicit ByteStream( uint64_t capacity );
-  // ~ByteStream();
-  // ByteStream( const ByteStream& other );
-  // ByteStream& operator=( const ByteStream& other );
-
-  // Helper functions (provided) to access the ByteStream's Reader and Writer interfaces
   Reader& reader();
   const Reader& reader() const;
   Writer& writer();
@@ -44,8 +35,6 @@ class Writer : public ByteStream
 {
 public:
   void push( std::string data ); // Push data to stream, but only as much as available capacity allows.
-  //? const string_view& + copy slower than string + move?
-
   void close();     // Signal that the stream has reached its ending. Nothing more will be written.
   void set_error(); // Signal that the stream suffered an error.
 

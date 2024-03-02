@@ -2,20 +2,27 @@
 #include <iostream>
 #include <string>
 
-using std::string;
+using namespace std;
 
 void get_URL( const string& host, const string& path )
 {
-  TCPSocket socket;
-  socket.connect( Address { host, "http" } );
-  socket.write( "GET " + path + " HTTP/1.1\r\n" );
-  socket.write( "Host: " + host + "\r\n" );
-  socket.write( "Connection: close\r\n\r\n" );
-  string data;
-  string datapart;
-  while ( !socket.eof() ) {
-    socket.read( datapart );
-    data += datapart;
+  string msg1 = "GET " + path + " HTTP/1.1" + "\r\n";
+  string msg2 = "Host: " + host + "\r\n";
+  string msg3 = "Connection: close\r\n";
+  string msg4 = "\r\n";
+ 
+  TCPSocket tcpSocket;
+  tcpSocket.connect(Address( host, "http" )); 
+  tcpSocket.write(msg1 + msg2 + msg3 + msg4);
+  tcpSocket.shutdown(SHUT_WR); 
+
+  string buf;
+  while (tcpSocket.eof() == false) 
+  {
+    tcpSocket.read( buf ); 
+    cout << buf;
   }
-  std::cout << data;
+
+  tcpSocket.close();
+  return;
 }
