@@ -48,18 +48,13 @@ public:
    * 4. when do [push "cdef", 2], it shoule replace the "cde" to the longer "cdef" on index 2.
    * as the example unassembled strings above. if bytes_pushed=2 (pushed "ab"), then reassembler
    * should be able to find "bcd" and push "cd" (such as remember the last bytes_pushed)
-   *
-   * 目前的实现有些混乱，因为我一开始误以为传入的子串 index 都是提前分割好固定的，也误以为 overlapping 只是针对
-   * 同 index 而言，花了很多时间去做 test fit。最后才知道是完全随机的。
    */
-
-  // How many bytes are stored in the Reassembler itself?
   uint64_t bytes_pending() const;
 
 private:
-  //* Reassembler throughput: 12.20 Gbit/s
-  std::map<size_t, std::string> _unassembled_strings;
-  size_t _last_string_end;
-  size_t _last_popped_end;
-  void _push_availables( Writer& output, size_t index );
+  uint64_t first_unassembled_index {0};
+  uint64_t first_unacceptavle_index {0};
+  std::deque<char> _assembleBuffer;
+  std::deque<char> _flagBuffer;
+  int64_t end_index {-1};
 };
