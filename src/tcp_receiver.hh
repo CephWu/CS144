@@ -7,11 +7,6 @@
 
 class TCPReceiver
 {
-private:
-  std::optional<Wrap32> _isn {};
-  // std::uniform_int_distribution<uint32_t> _gen_isn { 0, UINT32_MAX };
-  // std::default_random_engine _rd = get_random_engine();
-
 public:
   /*
    * The TCPReceiver receives TCPSenderMessages, inserting their payload into the Reassembler
@@ -21,7 +16,8 @@ public:
 
   /* The TCPReceiver sends TCPReceiverMessages back to the TCPSender. */
   TCPReceiverMessage send( const Writer& inbound_stream ) const;
-
+  TCPReceiver():
+    isn(0), fin(0),is_isn_set{0}, is_last_sub(0){}
   //* (note): send is like heartbeat events to notice the sender the status
   //* (copy): In your TCP implementation, you’ll use the first unassembled index as the checkpoint
 
@@ -31,4 +27,9 @@ public:
   //* With SYN length: sender: {seqno:11,payload:"a"}  receiver: {ackno:12,ws:...}
   //* Without SYN length: sender: {seqno:10,payload:"a"}  receiver: {ackno:11,ws:...}
   //* I think the main idea is to make the notion clear, and not necessary.
+private:
+  Wrap32 isn;
+  Wrap32 fin;
+  bool is_isn_set;
+  bool is_last_sub;
 };
