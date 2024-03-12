@@ -11,18 +11,21 @@
 
 class TCPSender
 {
-  Wrap32 isn_;
-  uint64_t initial_RTO_ms_;
-  uint16_t _rto_factor { 1 };
-  uint64_t _ms_since_last_ticked {}; // cumulative time since last called
-  uint64_t _consecutive_retransmissions {};
-  std::queue<uint64_t> _send_queue;
-  std::map<uint64_t, TCPSenderMessage> _messages; // abs seqno to message
-  uint64_t _popped_bytes {};                      // use bytes_popped() to get abs seqno
-  bool _started {};                               // mark SYN written
-  bool _finished {};                              // mark FIN written
-  uint64_t _last_ackno {};
-  uint64_t _window_size { 1 }; // as said in FAQ (for back off RTO)
+private:
+  Wrap32 _isn;
+  bool _isSent_ISN;
+  bool _isSent_FIN;
+  uint64_t _initial_RTO_ms;
+  int _cur_RTO_ms;               
+  bool _isStartTimer;              
+  TCPReceiverMessage _receivedMsg; 
+  uint64_t _abs_seqno; 
+  uint16_t _primitive_window_size;                       
+  std::deque<TCPSenderMessage> _outstanding_collections; 
+  std::deque<TCPSenderMessage> _ready_collections;     
+  uint64_t _outstanding_bytes;                          
+  uint64_t _consecutive_retransmissions_nums;           
+  
 
 public:
   /* Construct TCP sender with given default Retransmission Timeout and possible ISN */
