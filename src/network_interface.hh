@@ -41,19 +41,12 @@ private:
 
   // IP (known as Internet-layer or network-layer) address of the interface
   Address ip_address_;
-
-  static constexpr uint32_t ARP_REQUEST_COOLDOWN = 5 * 1000;
-  static constexpr uint32_t ARP_CACHE_EXPIRE_TIMEOUT = 30 * 1000;
-
-  std::queue<EthernetFrame> _send_queue;
-  // mapping from IPv4 to its pending datagrams with unknown THA and timeout
-  std::unordered_map<uint32_t, std::pair<std::list<IPv4Datagram>, uint64_t>> _pending_datagrams;
-  // mapping from IPv4 to Physical Address and timeout
-  std::unordered_map<uint32_t, std::pair<EthernetAddress, uint64_t>> _arp_cache;
-
-  inline void _send_datagram( const InternetDatagram& dgram, const EthernetAddress& dst );
-  inline void _clear_pendings( uint32_t ip, const EthernetAddress& dst );
-
+  std::unordered_map<uint32_t, std::vector<InternetDatagram>> _IP_dgrams; // 用于存储来不及发射的InternetDatagram
+  std::deque<EthernetFrame> _Ethe_frames;  //存放用internetdatagram生成的以太网帧
+  std::unordered_map<uint32_t, std::pair<EthernetAddress, uint64_t>> _map_IP2Ethe; //ip mac地址映射表
+  std::unordered_map<uint32_t, uint64_t> _arp_time;
+  const size_t _MAP_TTL;  //映射表内项目的生存时间只有30s
+  const size_t _ARP_TTL;  //同一个arp请求的间隔只有5s
 public:
   // Construct a network interface with given Ethernet (network-access-layer) and IP (internet-layer)
   // addresses
